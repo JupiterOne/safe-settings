@@ -3,7 +3,7 @@ restrictedRepos:
   #  If no file is specified, then the following repositories - 'admin', '.github', 'safe-settings' are exempted by default
   #exclude: ['admin', '.github', 'safe-settings']
   # Alternatively you can only include certain repos
-  include: ['helloworld']
+  include: ['helloworld', 'helloworld2']
 #configvalidators:
 #  - plugin: collaborators
 #    error: |
