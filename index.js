@@ -9,6 +9,36 @@ const NopCommand = require('./lib/nopcommand')
 let deploymentConfig
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   
+
+  //debug
+  async function syncPrivateSettings (nop, context, suborg, repo = context.repo(), ref) {
+    console.log("This repo is private. Applying private.yml")
+    /*
+    try {
+      deploymentConfig = await loadYamlFileSystem()
+      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      const configManager = new ConfigManager(context, ref)
+      const runtimeConfig = await configManager.loadGlobalSettingsYaml();
+      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+      return Settings.syncAll(nop, context, repo, config, ref)
+    } catch(e) {
+      if (nop) {
+        let filename="private.yml"
+        if (!deploymentConfig) {
+          filename="deployment-settings.yml"
+          deploymentConfig={}
+        }
+        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
+        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
+      } else {
+        throw e
+      }
+    }
+    */
+  }
+
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
 
     try {
@@ -19,8 +49,16 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       if (ref) {
+
+        //debug 
+        console.log(`syncAll ref repo called ${repo} with config ${config}`)
+
         return Settings.syncAll(nop, context, repo, config, ref)
       } else {
+
+        //debug 
+        console.log(`syncAll ref repo called ${repo} with config ${config}`)
+
         return Settings.syncAll(nop, context, repo, config)
       }
     } catch(e) {
@@ -65,6 +103,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     }
   }
 
+
+
   async function syncSettings (nop, context, repo = context.repo(), ref) {
     try {
       deploymentConfig = await loadYamlFileSystem()
@@ -74,6 +114,10 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       const runtimeConfig = await configManager.loadGlobalSettingsYaml();
       const config = Object.assign({}, deploymentConfig, runtimeConfig)
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+      
+      //debug 
+      console.log(`syncAll ref repo called ${repo} with config ${config}`)
+
       return Settings.sync(nop, context, repo, config, ref)
     } catch(e) {
       if (nop) {
@@ -289,6 +333,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug('Not working on the default branch, returning...')
       return
     }
+    
     const settingsModified = payload.commits.find(commit => {
       return commit.added.includes(Settings.FILE_NAME) ||
         commit.modified.includes(Settings.FILE_NAME)
