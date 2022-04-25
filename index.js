@@ -51,13 +51,13 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       if (ref) {
 
         //debug 
-        console.log(`syncAll ref repo called ${repo} with config ${config}`)
+        console.log(`syncAll ref repo called ${repo.name} with config ${config.FILE_NAME}`)
 
         return Settings.syncAll(nop, context, repo, config, ref)
       } else {
 
         //debug 
-        console.log(`syncAll ref repo called ${repo} with config ${config}`)
+        console.log(`syncAll repo called ${repo.name} with config ${config.FILE_NAME}`)
 
         return Settings.syncAll(nop, context, repo, config)
       }
@@ -116,7 +116,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       
       //debug 
-      console.log(`syncAll ref repo called ${repo} with config ${config}`)
+      console.log(`syncAll ref repo called ${repo.name} with config ${config.FILE_NAME}`)
 
       return Settings.sync(nop, context, repo, config, ref)
     } catch(e) {
