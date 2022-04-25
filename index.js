@@ -116,7 +116,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
       
       //debug 
-      console.log(`syncAll ref repo called ${repo.name} with config ${config.FILE_NAME}`)
+      console.log(`syncSettings repo called ${repo.name} with config ${config.FILE_NAME}`)
 
       return Settings.sync(nop, context, repo, config, ref)
     } catch(e) {
