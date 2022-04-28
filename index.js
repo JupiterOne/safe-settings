@@ -225,6 +225,46 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return undefined
   }
 
+  //CG Added Visbility Code
+  function getAddedVisibilityConfigName(payload) {
+    const repoSettingPattern = new Glob(".github/(private.yml|public.yml|internal.yml)")
+
+    let commit = payload.commits.find(c => {
+      return ( c.added.find(s => {
+        robot.log.debug(JSON.stringify(s))
+        return ( s.search(repoSettingPattern)>=0 )
+      }) !== undefined )
+    })
+
+    if (commit) {
+      robot.log.debug(`${JSON.stringify(commit)}`)
+      return {suborg: commit.added[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
+    } else {
+      robot.log.debug(`No additions to suborgs configs`)
+    }
+    return undefined
+  }
+
+  function getModifiedVisibilityConfigName(payload) {
+    const repoSettingPattern = new Glob(".github/(private.yml|public.yml|internal.yml)")
+
+    let commit = payload.commits.find(c => {
+      return ( c.modified.find(s => {
+        robot.log.debug(JSON.stringify(s))
+        return ( s.search(repoSettingPattern)>=0 )
+      }) !== undefined )
+    })
+
+    if (commit) {
+      robot.log.debug(`${JSON.stringify(commit)} \n ${commit.modified[0].match(repoSettingPattern)[1]}`)
+      return repo = {suborg: commit.modified[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
+    } else {
+      robot.log.debug(`No modifications to visibility configs`)
+    }
+    return undefined
+  }
+  //CG End
+
   function getChangedConfigName(glob, files, owner) {
     let modifiedFile = files.find(s => {
         return ( s.search(glob)>=0 )
@@ -313,6 +353,18 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     if (suborg) {
       return syncSubOrgSettings(false, context, suborg)
     }
+
+    //CG Added Visbility Code
+    let visibility = getModifiedVisibilityConfigName(payload)
+    if (visibility) {
+      return syncVisibilitySettings(false, context, visibility)
+    }
+
+    visibility = getAddedVisibilityConfigName(payload)
+    if (visibility) {
+      return syncVisibilitySettings(false, context, visibility)
+    }
+    //CG End
     
     if (!settingsModified) {
       robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
