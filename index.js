@@ -195,6 +195,9 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
   function getModifiedRepoConfigName(payload) {
     const repoSettingPattern = new Glob(".github/repos/*.yml")
+    robot.log.debug(`Debug Payload Below`)
+    robot.log.debug(`PAYLOAD: ${payload}`)
+    robot.log.debug(`Payload JSON: ${JSON.stringify(payload)}`)
 
     let commit = payload.commits.find(c => {
       return ( c.modified.find(s => {
@@ -204,6 +207,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     })
 
     if (commit) {
+      robot.log.debug(`Debug: Commit below`)
       robot.log.debug(`${JSON.stringify(commit)}`)
       return repo = {repo: commit.modified[0].match(repoSettingPattern)[1], owner: payload.repository.owner.name}
     } else {
