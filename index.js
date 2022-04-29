@@ -240,7 +240,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       robot.log.debug(`${JSON.stringify(commit)}`)
       return {suborg: commit.added[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
     } else {
-      robot.log.debug(`No additions to suborgs configs`)
+      robot.log.debug(`No additions to visibility configs`)
     }
     return undefined
   }
