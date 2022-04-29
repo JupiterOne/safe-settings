@@ -103,6 +103,30 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     }
   }
 
+  async function syncVisibilitySettings (nop, context, repo = context.repo(), ref) {
+    try {
+      deploymentConfig = await loadYamlFileSystem()
+      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
+      const configManager = new ConfigManager(context, ref)
+      const runtimeConfig = await configManager.loadGlobalSettingsYaml();
+      const config = Object.assign({}, deploymentConfig, runtimeConfig)
+      robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
+      return Settings.syncAll(nop, context, repo, config, ref)
+    } catch(e) {
+      if (nop) {
+        let filename="settings.yml"
+        if (!deploymentConfig) {
+          filename="deployment-settings.yml"
+          deploymentConfig={}
+        }
+        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
+        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
+        Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
+      } else {
+        throw e
+      }
+    }
+  }
 
 
   async function syncSettings (nop, context, repo = context.repo(), ref) {
@@ -273,9 +297,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     return undefined
   }
 
-  //CG Added Visbility Code
   function getAddedVisibilityConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/(private.yml|public.yml|internal.yml)")
+    const repoSettingPattern = new Glob(".github/visibility/(private.yml|public.yml|internal.yml)")
 
     let commit = payload.commits.find(c => {
       return ( c.added.find(s => {
@@ -294,7 +317,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
   }
 
   function getModifiedVisibilityConfigName(payload) {
-    const repoSettingPattern = new Glob(".github/(private.yml|public.yml|internal.yml)")
+    const repoSettingPattern = new Glob(".github/visibility/(private.yml|public.yml|internal.yml)")
 
     let commit = payload.commits.find(c => {
       return ( c.modified.find(s => {
@@ -311,7 +334,6 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     }
     return undefined
   }
-  //CG End
 
   function getChangedConfigName(glob, files, owner) {
     let modifiedFile = files.find(s => {
@@ -403,17 +425,20 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
       return syncSubOrgSettings(false, context, suborg)
     }
 
-    //CG Added Visbility Code
     let visibility = getModifiedVisibilityConfigName(payload)
     if (visibility) {
-      return syncVisibilitySettings(false, context, visibility)
+
+      //CG Debug 
+      this.debug.log(`syncing Visibility ${visibility}`)
+      return //syncVisibilitySettings(false, context, visibility)
     }
 
     visibility = getAddedVisibilityConfigName(payload)
     if (visibility) {
-      return syncVisibilitySettings(false, context, visibility)
+      //CG Debug 
+      this.debug.log(`syncing Visibility ${visibility}`)
+      return //syncVisibilitySettings(false, context, visibility)
     }
-    //CG End
     
     if (!settingsModified) {
       robot.log.debug(`No changes in '${Settings.FILE_NAME}' detected, returning...`)
