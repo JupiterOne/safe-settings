@@ -9,36 +9,6 @@ const NopCommand = require('./lib/nopcommand')
 let deploymentConfig
 module.exports = (robot, _, Settings = require('./lib/settings')) => {
   
-
-  //debug
-  async function syncPrivateSettings (nop, context, suborg, repo = context.repo(), ref) {
-    console.log("This repo is private. Applying private.yml")
-    /*
-    try {
-      deploymentConfig = await loadYamlFileSystem()
-      robot.log.debug(`deploymentConfig is ${JSON.stringify(deploymentConfig)}`)
-      const configManager = new ConfigManager(context, ref)
-      const runtimeConfig = await configManager.loadGlobalSettingsYaml();
-      const config = Object.assign({}, deploymentConfig, runtimeConfig)
-      robot.log.debug(`config for ref ${ref} is ${JSON.stringify(config)}`)
-      return Settings.syncAll(nop, context, repo, config, ref)
-    } catch(e) {
-      if (nop) {
-        let filename="private.yml"
-        if (!deploymentConfig) {
-          filename="deployment-settings.yml"
-          deploymentConfig={}
-        }
-        const nopcommand = new NopCommand(filename, repo, null,e, "ERROR")
-        console.error(`NOPCOMMAND ${JSON.stringify(nopcommand)}`)
-        Settings.handleError(nop, context, repo, deploymentConfig, ref, nopcommand)
-      } else {
-        throw e
-      }
-    }
-    */
-  }
-
   async function syncAllSettings (nop, context, repo = context.repo(), ref) {
 
     try {
@@ -308,8 +278,8 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
     })
 
     if (commit) {
-      robot.log.debug(`${JSON.stringify(commit)}`)
-      return {suborg: commit.added[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
+      robot.log.debug(`${JSON.stringify(commit)} \n ${commit.added[0].match(repoSettingPattern)[1]}`)
+      return {visibility: commit.added[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
     } else {
       robot.log.debug(`No additions to visibility configs`)
     }
@@ -328,7 +298,7 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
     if (commit) {
       robot.log.debug(`${JSON.stringify(commit)} \n ${commit.modified[0].match(repoSettingPattern)[1]}`)
-      return repo = {suborg: commit.modified[0].match(repoSettingPattern)[1], org: payload.repository.owner.name}
+      return {visibility: commit.modified[0].match(repoSettingPattern)[1], owner: payload.repository.owner.name}
     } else {
       robot.log.debug(`No modifications to visibility configs`)
     }
@@ -427,16 +397,13 @@ module.exports = (robot, _, Settings = require('./lib/settings')) => {
 
     let visibility = getModifiedVisibilityConfigName(payload)
     if (visibility) {
-
-      //CG Debug 
-      this.debug.log(`syncing Visibility ${visibility}`)
+      robot.log.debug(`syncing Visibility ${JSON.stringify(visibility)}`)
       return //syncVisibilitySettings(false, context, visibility)
     }
 
     visibility = getAddedVisibilityConfigName(payload)
     if (visibility) {
-      //CG Debug 
-      this.debug.log(`syncing Visibility ${visibility}`)
+      robot.log.debug(`syncing Visibility ${JSON.stringify(visibility)}`)
       return //syncVisibilitySettings(false, context, visibility)
     }
     
